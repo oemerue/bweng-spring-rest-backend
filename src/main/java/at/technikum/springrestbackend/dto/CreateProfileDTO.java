@@ -14,6 +14,9 @@ import java.util.Set;
 @Builder
 public class CreateProfileDTO {
 
+    @NotNull(message = "UserId darf nicht leer sein")
+    private Long userId;
+
     @NotNull(message = "Alter darf nicht leer sein")
     @Min(value = 18, message = "Alter muss mindestens 18 Jahre sein")
     @Max(value = 120, message = "Alter kann nicht mehr als 120 Jahre sein")

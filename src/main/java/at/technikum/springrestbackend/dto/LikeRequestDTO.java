@@ -1,17 +1,16 @@
 package at.technikum.springrestbackend.dto;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class LikeRequestDTO {
+    @NotNull(message = "userId darf nicht leer sein")
+    private Long userId;
 
-    @NotNull(message = "Profile ID darf nicht null sein")
+    @NotNull(message = "profileId darf nicht leer sein")
     private Long profileId;
 }

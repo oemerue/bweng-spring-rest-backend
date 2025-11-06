@@ -1,6 +1,7 @@
 package at.technikum.springrestbackend.config;
 
 import at.technikum.springrestbackend.security.JwtAuthenticationFilter;
+import at.technikum.springrestbackend.service.JwtService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
