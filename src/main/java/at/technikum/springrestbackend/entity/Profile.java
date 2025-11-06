@@ -35,22 +35,22 @@ public class Profile {
     private Integer age;
 
     @Column(length = 100)
-    private String location; // z.B. "Vienna, Austria" oder "Linz"
+    private String location;
 
     @Column(columnDefinition = "TEXT")
-    private String about; // Bio/About-Text (z.B. "Art student with a love for contemporary art...")
+    private String about;
 
     @Builder.Default
-    private Long profileViews = 0L; // Anzahl der Profile-Aufrufe
+    private Long profileViews = 0L;
 
     @Builder.Default
-    private Long likesReceived = 0L; // Anzahl Likes bekommen
+    private Long likesReceived = 0L;
 
     @Builder.Default
-    private Double responseRate = 0.0; // Antwort-Rate in % (0.0 - 100.0)
+    private Double responseRate = 0.0;
 
     @Builder.Default
-    private Integer interests_match = 0; // Prozentuale Übereinstimmung der Interessen
+    private Integer interestsMatch = 0;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
@@ -60,13 +60,13 @@ public class Profile {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    // One-to-Many Beziehung für Likes dieses Profils
-    @OneToMany(mappedBy = "profileLiked", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "profileLiked", cascade = CascadeType.ALL,
+            orphanRemoval = true)
     @Builder.Default
-    private Set<Like> likesReceived_relation = new HashSet<>();
+    private Set<Like> likesReceivedRelation = new HashSet<>();
 
-    // One-to-Many Beziehung für Profile Views
-    @OneToMany(mappedBy = "profileViewed", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "profileViewed", cascade = CascadeType.ALL,
+            orphanRemoval = true)
     @Builder.Default
-    private Set<ProfileView> profileViews_relation = new HashSet<>();
+    private Set<ProfileView> profileViewsRelation = new HashSet<>();
 }

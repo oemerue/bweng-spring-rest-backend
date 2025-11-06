@@ -1,6 +1,7 @@
 package at.technikum.springrestbackend.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +11,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "profile_views", uniqueConstraints = @UniqueConstraint(columnNames = {"viewer_id", "profile_viewed_id"}))
+@Table(name = "profile_views")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,15 +22,24 @@ public class ProfileView {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "viewer_id", nullable = false)
-    private User viewer; // User der das Profil anschaut
+    private User viewer;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "profile_viewed_id", nullable = false)
-    private Profile profileViewed; // Profil das angeschaut wurde
+    private Profile profileViewed;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @PrePersist
+    public void prePersist() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 }

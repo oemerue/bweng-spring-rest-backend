@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,5 +13,5 @@ import java.time.LocalDateTime;
 public class LikeRequestDTO {
 
     @NotNull(message = "Profile ID darf nicht null sein")
-    private Long profileId;  // Das Profil das geliked werden soll
+    private Long profileId;
 }
