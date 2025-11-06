@@ -21,12 +21,15 @@ public class UserRegisterRequestDTO {
     private String username;
 
     @NotBlank(message = "Password darf nicht leer sein")
-    @Size(min = 8, message = "Password muss mindestens 8 Zeichen lang sein, mit Groß-, Kleinbuchstaben und Zahlen")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d@$!%*?&]{8,}$", 
-             message = "Password muss Großbuchstaben, Kleinbuchstaben und Zahlen enthalten")
+    @Size(min = 8, message = "Password muss mindestens 8 Zeichen lang sein, "
+            + "mit Groß-, Kleinbuchstaben und Zahlen")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d@$!%*?&]{8,}$",
+            message = "Password muss Großbuchstaben, Kleinbuchstaben und Zahlen "
+                    + "enthalten")
     private String password;
 
     @NotBlank(message = "Country code darf nicht leer sein")
-    @Pattern(regexp = "^[A-Z]{2}$", message = "Country code sollte 2 Großbuchstaben sein (z.B. AT, DE)")
+    @Pattern(regexp = "^[A-Z]{2}$",
+            message = "Country code sollte 2 Großbuchstaben sein (z.B. AT, DE)")
     private String country;
 }

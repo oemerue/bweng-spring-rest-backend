@@ -14,25 +14,27 @@ import java.util.List;
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
-    // Finde alle Messages zwischen zwei Users
-    @Query("SELECT m FROM Message m WHERE (m.sender = :user1 AND m.receiver = :user2) OR (m.sender = :user2 AND m.receiver = :user1) ORDER BY m.createdAt DESC")
-    List<Message> findConversation(@Param("user1") User user1, @Param("user2") User user2);
+    @Query("SELECT m FROM Message m WHERE "
+            + "(m.sender = :user1 AND m.receiver = :user2) OR "
+            + "(m.sender = :user2 AND m.receiver = :user1) "
+            + "ORDER BY m.createdAt DESC")
+    List<Message> findConversation(@Param("user1") User user1,
+                                   @Param("user2") User user2);
 
-    // Finde alle eingegangenen Messages eines Users
     Page<Message> findByReceiver(User receiver, Pageable pageable);
 
-    // Finde alle gesendeten Messages eines Users
     Page<Message> findBySender(User sender, Pageable pageable);
 
-    // Finde ungelesene Messages
-    @Query("SELECT m FROM Message m WHERE m.receiver = :user AND m.isRead = false")
+    @Query("SELECT m FROM Message m WHERE m.receiver = :user "
+            + "AND m.isRead = false")
     List<Message> findUnreadMessages(@Param("user") User user);
 
-    // Zähle ungelesene Messages
-    @Query("SELECT COUNT(m) FROM Message m WHERE m.receiver = :user AND m.isRead = false")
+    @Query("SELECT COUNT(m) FROM Message m WHERE m.receiver = :user "
+            + "AND m.isRead = false")
     long countUnreadMessages(@Param("user") User user);
 
-    // Markiere Messages als gelesen
-    @Query("UPDATE Message m SET m.isRead = true WHERE m.receiver = :user AND m.sender = :sender")
-    void markMessagesAsRead(@Param("user") User user, @Param("sender") User sender);
+    @Query("UPDATE Message m SET m.isRead = true WHERE m.receiver = :user "
+            + "AND m.sender = :sender")
+    void markMessagesAsRead(@Param("user") User user,
+                            @Param("sender") User sender);
 }
