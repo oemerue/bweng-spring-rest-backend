@@ -5,8 +5,8 @@ import at.technikum.springrestbackend.dto.UserLoginRequestDTO;
 import at.technikum.springrestbackend.dto.UserRegisterRequestDTO;
 import at.technikum.springrestbackend.entity.User;
 import at.technikum.springrestbackend.repository.UserRepository;
-import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -25,7 +25,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponseDTO register(UserRegisterRequestDTO request) {
-        // E-Mail & Username müssen einzigartig sein
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("E-Mail bereits registriert!");
         }
@@ -33,24 +32,22 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Benutzername bereits vergeben!");
         }
 
-        // User anlegen (Passwort sicher hashen)
         User user = User.builder()
                 .email(request.getEmail())
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .country(request.getCountry())
-                .role(User.Role.USER)
+                .role("USER")
                 .build();
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
-        // JWT generieren (Subject = Email, Claims: id/username)
-        String token = jwtService.generateToken(user);
+        String token = jwtService.generateToken(savedUser);
 
         return AuthResponseDTO.builder()
-                .userId(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
+                .userId(savedUser.getId())
+                .username(savedUser.getUsername())
+                .email(savedUser.getEmail())
                 .token(token)
                 .tokenType("Bearer")
                 .expiresIn(jwtService.getExpirationMs())
@@ -60,10 +57,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponseDTO login(UserLoginRequestDTO request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Benutzer nicht gefunden!"));
+                .orElseThrow(() -> new RuntimeException(
+                        "Benutzer nicht gefunden!"));
 
-        // Passwort prüfen (Hash-Vergleich)
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(),
+                user.getPassword())) {
             throw new RuntimeException("Falsches Passwort!");
         }
 

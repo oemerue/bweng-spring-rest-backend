@@ -85,35 +85,46 @@ public class ProfileServiceImpl implements ProfileService {
     public List<ProfileDTO> getAllProfiles(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Profile> pageResult = profileRepository.findAll(pageable);
-        return pageResult.stream().map(this::mapToDTO).collect(Collectors.toList());
+        return pageResult.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<ProfileDTO> getProfilesByAgeRange(Integer minAge, Integer maxAge, int page, int size) {
+    public List<ProfileDTO> getProfilesByAgeRange(Integer minAge, Integer maxAge,
+                                                  int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Profile> pageResult = profileRepository.findByAgeBetween(minAge, maxAge, pageable);
-        return pageResult.stream().map(this::mapToDTO).collect(Collectors.toList());
+        return pageResult.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<ProfileDTO> getProfilesByLocation(String location, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Profile> pageResult = profileRepository.findByLocation(location, pageable);
-        return pageResult.stream().map(this::mapToDTO).collect(Collectors.toList());
+        return pageResult.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<ProfileDTO> getMostLikedProfiles(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Profile> pageResult = profileRepository.findMostLikedProfiles(pageable);
-        return pageResult.stream().map(this::mapToDTO).collect(Collectors.toList());
+        return pageResult.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<ProfileDTO> getMostViewedProfiles(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Profile> pageResult = profileRepository.findMostViewedProfiles(pageable);
-        return pageResult.stream().map(this::mapToDTO).collect(Collectors.toList());
+        return pageResult.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
     /* -------------------- HILFSMETHODEN -------------------- */
@@ -123,11 +134,15 @@ public class ProfileServiceImpl implements ProfileService {
      * Alte Interests werden ersetzt.
      */
     private void assignInterestsToUser(User user, Set<Long> interestIds) {
-        if (interestIds == null) return;
+        if (interestIds == null) {
+            return;
+        }
 
         Set<Interest> interests = interestIds.stream()
                 .map(id -> interestRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Interest mit ID " + id + " nicht gefunden!")))
+                        .orElseThrow(() -> new RuntimeException(
+                                "Interest mit ID " + id + " nicht gefunden!"
+                        )))
                 .collect(Collectors.toSet());
 
         user.setInterests(interests);
@@ -141,11 +156,14 @@ public class ProfileServiceImpl implements ProfileService {
                 .map(Interest::getName)
                 .collect(Collectors.toSet());
 
+        // Щоб не мати дуже довгі рядки, за бажання — тимчасова змінна:
+        String pictureUrl = p.getUser().getProfilePictureUrl();
+
         return ProfileDTO.builder()
                 .id(p.getId())
                 .userId(p.getUser().getId())
                 .username(p.getUser().getUsername())
-                .profilePictureUrl(p.getUser().getProfilePictureUrl())
+                .profilePictureUrl(pictureUrl)
                 .age(p.getAge())
                 .location(p.getLocation())
                 .about(p.getAbout())
