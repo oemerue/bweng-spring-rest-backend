@@ -10,9 +10,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/profiles")
 public class ProfileController {
+
     private final ProfileService profiles;
 
-    public ProfileController(ProfileService profiles) { this.profiles = profiles; }
+    public ProfileController(ProfileService profiles) {
+        this.profiles = profiles;
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

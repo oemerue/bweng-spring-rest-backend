@@ -15,7 +15,9 @@ public class MatchController {
 
     private final MatchService matches;
 
-    public MatchController(MatchService matches) { this.matches = matches; }
+    public MatchController(MatchService matches) {
+        this.matches = matches;
+    }
 
     @PostMapping("/like")
     @ResponseStatus(HttpStatus.CREATED)

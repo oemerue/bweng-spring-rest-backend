@@ -9,9 +9,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+
     private final AuthService auth;
 
-    public AuthController(AuthService auth) { this.auth = auth; }
+    public AuthController(AuthService auth) {
+        this.auth = auth;
+    }
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
