@@ -1,0 +1,3 @@
+CREATE USER appuser WITH PASSWORD 'appsecret';
+ALTER USER appuser CREATEDB;
+GRANT ALL PRIVILEGES ON DATABASE vertie TO appuser;
