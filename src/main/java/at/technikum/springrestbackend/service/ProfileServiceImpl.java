@@ -36,8 +36,18 @@ public class ProfileServiceImpl implements ProfileService {
         if (repo.existsByUsername(dto.username)) {
             throw new IllegalArgumentException("username bereits vergeben");
         }
-        Profile p = new Profile();
-        apply(p, dto.username, dto.age, dto.gender, dto.city, dto.country, dto.bio, dto.avatarUrl, dto.interests);
+
+        Profile p = new Profile(
+                dto.username,
+                dto.age,
+                dto.gender,
+                dto.city,
+                dto.country,
+                dto.bio,
+                dto.avatarUrl,
+                dto.interests
+        );
+
         return toDto(repo.save(p));
     }
 

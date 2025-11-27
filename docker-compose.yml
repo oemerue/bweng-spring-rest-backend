@@ -2,26 +2,37 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:16
-    container_name: vertie-postgres
+    image: mariadb:10.11
+    container_name: bweng-mariadb
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: vertie
-      POSTGRES_HOST_AUTH_METHOD: "scram-sha-256"
-      POSTGRES_INITDB_ARGS: "-c password_encryption=scram-sha-256 -c log_connections=on"
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: appdb
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: appsecret
     ports:
-      - "5433:5432"
-    volumes:
-      - db-data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/01_init.sql
+      - "3306:3306"
+    command: ["--character-set-server=utf8mb4","--collation-server=utf8mb4_unicode_ci"]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d vertie"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uappuser -pappsecret --silent"]
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 10s
+      retries: 10
+    volumes:
+      - db-data:/var/lib/mysql
+
+  minio:
+    image: minio/minio:RELEASE.2024-05-10T01-41-38Z
+    container_name: bweng-minio
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio12345
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"   # API
+      - "9001:9001"   # Console (Dashboard)
+    volumes:
+      - minio-data:/data
 
 volumes:
   db-data:
-    driver: local
+  minio-data:
