@@ -13,6 +13,8 @@ public class CreateProfileDTO {
     @Pattern(regexp="^https?://.+", message="avatarUrl muss eine gültige URL sein")
     public String avatarUrl;
     @NotEmpty public List<@NotBlank String> interests;
+    @NotBlank public String password;
+
 
     public String getUsername() {
         return username;
@@ -76,6 +78,14 @@ public class CreateProfileDTO {
 
     public void setInterests(List<String> interests) {
         this.interests = interests;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
 
