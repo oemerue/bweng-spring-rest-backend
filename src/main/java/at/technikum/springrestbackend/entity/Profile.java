@@ -50,9 +50,6 @@ public class Profile {
     @Column(nullable = false)
     private String role = "ROLE_USER";
 
-    // --- Konstruktoren ---
-
-    // JPA braucht einen parameterlosen Konstruktor
     public Profile() {
     }
 

@@ -26,7 +26,6 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO request) {
 
-        // 1) User mit Username + Passwort authentifizieren
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.username,
@@ -34,13 +33,13 @@ public class AuthController {
                 )
         );
 
-        // 2) Authentifizierten User holen
+
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        // 3) JWT erzeugen
+
         String token = jwtService.generateToken(userDetails);
 
-        // 4) Token als JSON zurückgeben
+
         LoginResponseDTO response = new LoginResponseDTO(token);
         return ResponseEntity.ok(response);
     }

@@ -41,15 +41,13 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public ProfileResponseDTO create(CreateProfileDTO dto) {
-        // Username darf nur einmal vorkommen
+
         if (repo.existsByUsername(dto.username)) {
             throw new IllegalArgumentException("username bereits vergeben");
         }
 
-        // neues Profil-Objekt (kein langer Konstruktor)
         Profile profile = new Profile();
 
-        // „normale“ Profilfelder setzen
         applyProfileFields(
                 profile,
                 dto.username,
@@ -75,13 +73,11 @@ public class ProfileServiceImpl implements ProfileService {
     public ProfileResponseDTO update(Long id, UpdateProfileDTO dto) {
         Profile profile = findOrThrow(id);
 
-        // Wenn Username geändert wird: prüfen, ob dieser schon existiert
         if (!profile.getUsername().equals(dto.username)
                 && repo.existsByUsername(dto.username)) {
             throw new IllegalArgumentException("username bereits vergeben");
         }
 
-        // Profilfelder updaten (ohne Passwort)
         applyProfileFields(
                 profile,
                 dto.username,
@@ -94,11 +90,6 @@ public class ProfileServiceImpl implements ProfileService {
                 dto.interests
         );
 
-        // Passwortänderung optional – nur falls ihr das im UpdateDTO vorsieht:
-        // if (dto.password != null && !dto.password.isBlank()) {
-        //     String hashed = passwordEncoder.encode(dto.password);
-        //     profile.setPasswordHash(hashed);
-        // }
 
         Profile saved = repo.save(profile);
         return toDto(saved);
@@ -117,9 +108,6 @@ public class ProfileServiceImpl implements ProfileService {
                 .orElseThrow(() -> new EntityNotFoundException("Profile nicht gefunden"));
     }
 
-    /**
-     * Setzt alle „normalen“ Profilfelder (ohne Passwort/Rolle).
-     */
     private void applyProfileFields(Profile p,
                                     String username,
                                     Integer age,

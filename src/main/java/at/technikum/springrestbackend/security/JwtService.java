@@ -14,7 +14,7 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    // Einfacher Secret-Key für den Milestone (mind. 32 Zeichen)
+    //(mind. 32 Zeichen)
     private static final String SECRET = "supergeheimesjwtsecret-supergeheimesjwtsecret";
     private static final long EXPIRATION_MS = 1000 * 60 * 60; // 1 Stunde
 
@@ -26,25 +26,35 @@ public class JwtService {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + EXPIRATION_MS);
 
+        // username, austellungsd., ablaufd., signatur in token reinschreiben und in string verwandeln
         return Jwts.builder()
-                .setSubject(userDetails.getUsername())          // Username in den Token schreiben
-                .setIssuedAt(now)                               // Ausstellungszeitpunkt
-                .setExpiration(expiry)                          // Ablaufzeit
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256) // mit Secret signieren
-                .compact();                                     // zu String "xxx.yyy.zzz" machen
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(now)
+                .setExpiration(expiry)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);         // subject = username
-    }
 
-    public <T> T extractClaim(String token, Function<Claims, T> resolver) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())                 // zum Prüfen wieder das Secret
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-        return resolver.apply(claims);
+    }
+
+    public String extractUsername(String token) {
+        return extractAllClaims(token).getSubject();
+    }
+
+    public Date extractExpiration(String token) {
+        return extractAllClaims(token).getExpiration();
+    }
+
+    private boolean isExpired(String token) {
+        Date expiration = extractExpiration(token);
+        return expiration.before(new Date());
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
@@ -52,8 +62,4 @@ public class JwtService {
         return username.equals(userDetails.getUsername()) && !isExpired(token);
     }
 
-    private boolean isExpired(String token) {
-        Date expiration = extractClaim(token, Claims::getExpiration);
-        return expiration.before(new Date());
-    }
 }

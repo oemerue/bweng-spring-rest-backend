@@ -10,7 +10,6 @@ public class PasswordConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // BCrypt ist der Standard-Algorithmus zum sicheren Hashen von Passwörtern
         return new BCryptPasswordEncoder();
     }
 }
