@@ -1,5 +1,7 @@
 package at.technikum.springrestbackend.config;
 
+import at.technikum.springrestbackend.security.CustomUserDetailsService;
+import at.technikum.springrestbackend.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,13 +28,11 @@ public class SecurityConfig {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
-    // 🔹 Das ist der Bean, den dein AuthController braucht
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 
-    // 🔹 Security-FilterChain (JWT, geschützte Endpunkte etc.)
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
