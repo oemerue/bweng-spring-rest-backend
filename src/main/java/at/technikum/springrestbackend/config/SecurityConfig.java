@@ -41,6 +41,15 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/swagger-ui/**"
                         ).permitAll()
+                        .anyRequest().authenticated()  .requestMatchers("/api/auth/**").permitAll()
+
+                        // USER & ADMIN
+                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
+
+                        // NUR ADMIN
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // alles andere nur eingeloggte User
                         .anyRequest().authenticated()
                 )
                 .userDetailsService(userDetailsService)
