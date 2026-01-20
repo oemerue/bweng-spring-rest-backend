@@ -1,82 +1,91 @@
 package at.technikum.springrestbackend.entity;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
+/**
+ * Profile entity = application user.
+ *
+ * Implements UserDetails so Spring Security can use it for authentication/authorization.
+ *
+ * Project requirements covered:
+ *  - Required user data: email, username, password hash, country
+ *  - Users & admins via role
+ *  - Admin can lock users out of the application via enabled flag
+ *  - createdAt / updatedAt timestamps for sorting/auditing
+ */
 @Entity
-public class Profile {
+@Table(
+        name = "profiles",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_profiles_email", columnNames = "email"),
+                @UniqueConstraint(name = "uk_profiles_username", columnNames = "username")
+        }
+)
+public class Profile implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "username darf nicht leer sein")
-    @Column(nullable = false, unique = true)
-    private String username;
+    @Column(nullable = false, length = 255)
+    private String email;
 
-    @NotNull
-    @Min(18)
-    @Max(120)
-    @Column(nullable = false)
-    private Integer age;
-
-    @NotBlank(message = "gender darf nicht leer sein")
-    private String gender; // "male","female","diverse" etc.
-
-    @NotBlank
-    private String city;
-
-    @NotBlank
-    private String country;
-
-    @Size(max = 500)
-    private String bio;
-
-    @Pattern(regexp = "^https?://.+", message = "avatarUrl muss eine gültige URL sein")
-    private String avatarUrl;
-
-    @ElementCollection
-    @CollectionTable(name = "profile_interests", joinColumns = @JoinColumn(name = "profile_id"))
-    @Column(name = "interest")
-    @NotEmpty(message = "mindestens ein Interest erforderlich")
-    private List<@NotBlank String> interests = new ArrayList<>();
-
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     private String passwordHash;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Role role = Role.USER;
+
+    @Column(nullable = false, length = 50)
+    private String username;
+
+    @Column(nullable = false, length = 2)
+    private String country;
+
+    @Column(columnDefinition = "TEXT")
+    private String bio;
+
+    private Integer age;
+
+    @Column(length = 120)
+    private String city;
+
+    @Column(length = 20)
+    private String gender;
+
+    @Column(length = 300)
+    private String avatarObjectKey;
+
     @Column(nullable = false)
-    private String role = "ROLE_USER";
+    private boolean enabled = true;
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
 
     public Profile() {
-    }
-
-    public Profile(
-            Long id,
-            String username,
-            Integer age,
-            String gender,
-            String city,
-            String country,
-            String bio,
-            String avatarUrl,
-            List<@NotBlank String> interests,
-            String passwordHash,
-            String role) {
-
-        this.id = id;
-        this.username = username;
-        this.age = age;
-        this.gender = gender;
-        this.city = city;
-        this.country = country;
-        this.bio = bio;
-        this.avatarUrl = avatarUrl;
-        this.interests = interests;
-        this.passwordHash = passwordHash;
-        this.role = role;
     }
 
     public Long getId() {
@@ -87,36 +96,40 @@ public class Profile {
         this.id = id;
     }
 
-    public String getUsername() {
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public String getUsernameDisplay() {
         return username;
     }
 
-    public void setUsername(String username) {
+    public void setUsernameDisplay(String username) {
         this.username = username;
     }
 
-    public Integer getAge() {
-        return age;
-    }
-
-    public void setAge(Integer age) {
-        this.age = age;
-    }
-
-    public String getGender() {
-        return gender;
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
+    public String getUsernameValue() {
+        return username;
     }
 
     public String getCountry() {
@@ -135,36 +148,86 @@ public class Profile {
         this.bio = bio;
     }
 
-    public String getAvatarUrl() {
-        return avatarUrl;
+    public Integer getAge() {
+        return age;
     }
 
-    public void setAvatarUrl(String avatarUrl) {
-        this.avatarUrl = avatarUrl;
+    public void setAge(Integer age) {
+        this.age = age;
     }
 
-    public List<String> getInterests() {
-        return interests;
+    public String getCity() {
+        return city;
     }
 
-    public void setInterests(List<String> interests) {
-        this.interests = interests;
+    public void setCity(String city) {
+        this.city = city;
     }
 
-    public String getPasswordHash() {
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getAvatarObjectKey() {
+        return avatarObjectKey;
+    }
+
+    public void setAvatarObjectKey(String avatarObjectKey) {
+        this.avatarObjectKey = avatarObjectKey;
+    }
+
+    public boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public String getPassword() {
         return passwordHash;
     }
 
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
-    public String getRole() {
-        return role;
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
     }
 
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
 }
