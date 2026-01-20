@@ -1,64 +1,71 @@
 package at.technikum.springrestbackend.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.security.core.userdetails.UserDetails;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Service
 public class JwtService {
 
-    //(mind. 32 Zeichen)
-    private static final String SECRET = "supergeheimesjwtsecret-supergeheimesjwtsecret";
-    private static final long EXPIRATION_MS = 1000 * 60 * 60; // 1 Stunde
+    @Value("${jwt.secret:dev-secret-min-32-chars-long-for-dev-env}")
+    private String secret;
 
-    private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET.getBytes());
+    @Value("${jwt.expiration-ms:3600000}")
+    private long expirationMs;
+
+    private SecretKey signingKey;
+    private JwtParser jwtParser;
+
+    @PostConstruct
+    void init() {
+        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+        this.signingKey = Keys.hmacShaKeyFor(keyBytes); // throws if too short
+        this.jwtParser = Jwts.parserBuilder()
+                .setSigningKey(signingKey)
+                .build();
+
+        if (expirationMs <= 0) {
+            throw new IllegalStateException("jwt.expiration-ms must be > 0");
+        }
     }
 
-    public String generateToken(UserDetails userDetails) {
-        Date now = new Date();
-        Date expiry = new Date(now.getTime() + EXPIRATION_MS);
+    public String generateToken(String email) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("email is required");
+        }
 
-        // username, austellungsd., ablaufd., signatur in token reinschreiben und in string verwandeln
+        Date now = new Date();
+        Date exp = new Date(now.getTime() + expirationMs);
+
         return Jwts.builder()
-                .setSubject(userDetails.getUsername())
+                .setSubject(email)
                 .setIssuedAt(now)
-                .setExpiration(expiry)
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .setExpiration(exp)
+                .signWith(signingKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-
-    private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+    public String getEmailFromToken(String token) {
+        Claims claims = jwtParser.parseClaimsJws(token).getBody();
+        return claims.getSubject();
     }
 
-    public String extractUsername(String token) {
-        return extractAllClaims(token).getSubject();
+    public boolean isTokenValid(String token) {
+        try {
+            jwtParser.parseClaimsJws(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
     }
-
-    public Date extractExpiration(String token) {
-        return extractAllClaims(token).getExpiration();
-    }
-
-    private boolean isExpired(String token) {
-        Date expiration = extractExpiration(token);
-        return expiration.before(new Date());
-    }
-
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        String username = extractUsername(token);
-        return username.equals(userDetails.getUsername()) && !isExpired(token);
-    }
-
 }

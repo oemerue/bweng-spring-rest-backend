@@ -1,12 +1,10 @@
 package at.technikum.springrestbackend.security;
 
-import at.technikum.springrestbackend.entity.Profile;
 import at.technikum.springrestbackend.repository.ProfileRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.security.core.userdetails.User;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -18,15 +16,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Profile profile = profileRepository
-                .findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        return User
-                .withUsername(profile.getUsername())
-                .password(profile.getPasswordHash())
-                .roles(profile.getRole())
-                .build();
+    public UserDetails loadUserByUsername(String email)
+            throws UsernameNotFoundException {
+        return profileRepository.findByEmail(email.toLowerCase())
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        "User not found: " + email));
     }
 }

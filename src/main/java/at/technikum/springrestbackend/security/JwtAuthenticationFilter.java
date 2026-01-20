@@ -1,61 +1,71 @@
 package at.technikum.springrestbackend.security;
 
+import at.technikum.springrestbackend.entity.Profile;
+import at.technikum.springrestbackend.repository.ProfileRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final String AUTH_HEADER = "Authorization";
+    private static final String BEARER_PREFIX = "Bearer ";
+
     private final JwtService jwtService;
-    private final CustomUserDetailsService userDetailsService;
+    private final ProfileRepository profileRepository;
 
     public JwtAuthenticationFilter(JwtService jwtService,
-                                   CustomUserDetailsService userDetailsService) {
+                                   ProfileRepository profileRepository) {
         this.jwtService = jwtService;
-        this.userDetailsService = userDetailsService;
+        this.profileRepository = profileRepository;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain)
-            throws ServletException, IOException {
+                                    FilterChain filterChain) throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
-
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        String jwt = authHeader.substring(7);
-        String username = jwtService.extractUsername(jwt);
-
-            //Security blablabla = username + token = war schon?
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-            if (jwtService.isTokenValid(jwt, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
-
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
+        String token = getBearerToken(request);
+        if (token != null) {
+            authenticate(token);
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private String getBearerToken(HttpServletRequest request) {
+        String header = request.getHeader(AUTH_HEADER);
+        if (header == null || !header.startsWith(BEARER_PREFIX)) {
+            return null;
+        }
+        return header.substring(BEARER_PREFIX.length());
+    }
+
+    private void authenticate(String token) {
+        if (!jwtService.isTokenValid(token)) {
+            return;
+        }
+
+        String email = jwtService.getEmailFromToken(token);
+        Profile profile = profileRepository.findByEmail(email).orElse(null);
+        if (profile == null) {
+            return;
+        }
+
+        UsernamePasswordAuthenticationToken auth =
+                new UsernamePasswordAuthenticationToken(
+                        profile,
+                        null,
+                        profile.getAuthorities()
+                );
+
+        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 }
