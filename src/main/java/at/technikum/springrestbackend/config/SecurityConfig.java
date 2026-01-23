@@ -1,7 +1,6 @@
 package at.technikum.springrestbackend.config;
 
 import at.technikum.springrestbackend.security.JwtAuthenticationFilter;
-import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +17,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import at.technikum.springrestbackend.security.JsonAccessDeniedHandler;
+import at.technikum.springrestbackend.security.JsonAuthenticationEntryPoint;
 
 @Configuration
 @EnableWebSecurity
@@ -25,9 +26,16 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JsonAuthenticationEntryPoint authenticationEntryPoint;
+    private final JsonAccessDeniedHandler accessDeniedHandler;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            JsonAuthenticationEntryPoint authenticationEntryPoint,
+            JsonAccessDeniedHandler accessDeniedHandler) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.authenticationEntryPoint = authenticationEntryPoint;
+        this.accessDeniedHandler = accessDeniedHandler;
     }
 
     @Bean
@@ -43,10 +51,8 @@ public class SecurityConfig {
     }
 
     private void configureExceptionHandling(ExceptionHandlingConfigurer<HttpSecurity> ex) {
-        ex.authenticationEntryPoint((req, res, e) ->
-                res.sendError(HttpServletResponse.SC_UNAUTHORIZED));
-        ex.accessDeniedHandler((req, res, e) ->
-                res.sendError(HttpServletResponse.SC_FORBIDDEN));
+        ex.authenticationEntryPoint(authenticationEntryPoint);
+        ex.accessDeniedHandler(accessDeniedHandler);
     }
 
     private void configureAuthorization(
@@ -59,12 +65,20 @@ public class SecurityConfig {
         auth.requestMatchers(HttpMethod.GET, "/api/profiles", "/api/profiles/**")
                 .permitAll();
 
-        auth.requestMatchers(HttpMethod.GET, "/api/posts", "/api/posts/**")
-                .permitAll();
+        auth.requestMatchers(HttpMethod.GET, "/api/posts", "/api/posts/**").permitAll();
+        auth.requestMatchers(HttpMethod.POST, "/api/posts", "/api/posts/**").authenticated();
+        auth.requestMatchers(HttpMethod.PUT, "/api/posts", "/api/posts/**").authenticated();
+        auth.requestMatchers(HttpMethod.DELETE, "/api/posts", "/api/posts/**").authenticated();
 
         auth.requestMatchers(HttpMethod.GET, "/api/files/**").permitAll();
 
         auth.requestMatchers("/api/admin/**").hasRole("ADMIN");
+
+        auth.requestMatchers(
+                "/swagger-ui.html",
+                "/swagger-ui/**",
+                "/v3/api-docs/**"
+        ).permitAll();
 
         auth.anyRequest().authenticated();
     }

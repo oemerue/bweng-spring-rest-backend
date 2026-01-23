@@ -29,7 +29,7 @@ public class JwtService {
     @PostConstruct
     void init() {
         byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
-        this.signingKey = Keys.hmacShaKeyFor(keyBytes); // throws if too short
+        this.signingKey = Keys.hmacShaKeyFor(keyBytes);
         this.jwtParser = Jwts.parserBuilder()
                 .setSigningKey(signingKey)
                 .build();
@@ -61,9 +61,19 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token) {
+        if (token == null) return false;
+
+        if (!token.equals(token.trim())) return false;
+        if (token.isBlank()) return false;
+
+        if (!token.matches("^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$")) {
+            return false;
+        }
+
         try {
-            jwtParser.parseClaimsJws(token);
-            return true;
+            Claims claims = jwtParser.parseClaimsJws(token).getBody();
+            Date expiration = claims.getExpiration();
+            return expiration != null && expiration.after(new Date());
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
