@@ -34,9 +34,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = getBearerToken(request);
         if (token != null) {
-            authenticate(token);
+            try {
+                authenticate(token);
+            } catch (org.springframework.security.authentication.DisabledException ex) {
+                // 403 JSON
+                response.setStatus(403);
+                response.setContentType("application/json");
+                throw ex;
+            }
         }
-
         filterChain.doFilter(request, response);
     }
 
@@ -53,10 +59,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            return;
+        }
+
         String email = jwtService.getEmailFromToken(token);
         Profile profile = profileRepository.findByEmail(email).orElse(null);
         if (profile == null) {
             return;
+        }
+
+        if (!profile.isEnabled()) {
+            throw new org.springframework.security.authentication.DisabledException("User account is disabled");
         }
 
         UsernamePasswordAuthenticationToken auth =

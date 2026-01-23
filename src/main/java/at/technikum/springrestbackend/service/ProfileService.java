@@ -138,6 +138,12 @@ public class ProfileService {
     }
 
     private Profile updateProfile(Profile profile, ProfileUpdateDTO dto) {
+        updateProfileFields(profile, dto);
+        return profileRepository.save(profile);
+    }
+
+    private void updateProfileFields(Profile profile,
+                                     ProfileUpdateDTO dto) {
         StringUtil.getNonBlank(dto.getUsername()).ifPresent(username -> {
             boolean changed = !username.equals(profile.getUsernameDisplay());
             if (changed && profileRepository.existsByUsername(username)) {
@@ -150,19 +156,23 @@ public class ProfileService {
         });
 
         if (dto.getBio() != null) {
-            profile.setBio(dto.getBio());
+            profile.setBio(StringUtil.getNonBlank(dto.getBio()).orElse(null));
         }
+
         if (dto.getAge() != null) {
             profile.setAge(dto.getAge());
         }
+
         if (dto.getCity() != null) {
-            profile.setCity(dto.getCity());
-        }
-        if (dto.getGender() != null) {
-            profile.setGender(dto.getGender());
+            profile.setCity(StringUtil.getNonBlank(dto.getCity()).orElse(null));
         }
 
-        return profileRepository.save(profile);
+        if (dto.getGender() != null) {
+            String normalizedGender = StringUtil.getNonBlank(dto.getGender())
+                    .map(String::toUpperCase)
+                    .orElse(null);
+            profile.setGender(normalizedGender);
+        }
     }
 
     private Profile uploadAvatarForProfile(Profile profile, MultipartFile file) {
