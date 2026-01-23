@@ -19,23 +19,14 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * Profile entity = application user.
- *
- * Implements UserDetails so Spring Security can use it for authentication/authorization.
- *
- * Project requirements covered:
- *  - Required user data: email, username, password hash, country
- *  - Users & admins via role
- *  - Admin can lock users out of the application via enabled flag
- *  - createdAt / updatedAt timestamps for sorting/auditing
- */
 @Entity
 @Table(
         name = "profiles",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_profiles_email", columnNames = "email"),
-                @UniqueConstraint(name = "uk_profiles_username", columnNames = "username")
+                @UniqueConstraint(name = "uk_profiles_email",
+                        columnNames = "email"),
+                @UniqueConstraint(name = "uk_profiles_username",
+                        columnNames = "username")
         }
 )
 public class Profile implements UserDetails {
