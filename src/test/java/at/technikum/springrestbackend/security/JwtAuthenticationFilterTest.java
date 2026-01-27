@@ -50,100 +50,72 @@ class JwtAuthenticationFilterTest {
 
     @AfterEach
     void tearDown() {
-        // Важливо очищати SecurityContext після кожного тесту!
         SecurityContextHolder.clearContext();
     }
 
-    // ==================== УСПІШНА АУТЕНТИФІКАЦІЯ ====================
-
     @Test
-    @DisplayName("Валідний токен встановлює Authentication в SecurityContext")
+    @DisplayName("Valid token sets Authentication in SecurityContext")
     void doFilterInternal_validToken_setsAuthentication() throws ServletException, IOException {
-        // Given
-        String token = "valid. jwt.token";
+        String token = "valid.jwt.token";
         String email = "user@example.com";
 
         Profile profile = createTestProfile(1L, email, Role.USER);
 
-        // Налаштовуємо заголовок Authorization:  Bearer <token>
         request.addHeader("Authorization", "Bearer " + token);
 
         when(jwtService.isTokenValid(token)).thenReturn(true);
         when(jwtService.getEmailFromToken(token)).thenReturn(email);
         when(profileRepository.findByEmail(email)).thenReturn(Optional.of(profile));
 
-        // When
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
-        // Then
-        // 1. Перевіряємо, що фільтр продовжив ланцюжок
         verify(filterChain).doFilter(request, response);
 
-        // 2. Перевіряємо, що Authentication встановлено
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        assertNotNull(authentication, "Authentication повинен бути встановлений");
-        assertEquals(profile, authentication.getPrincipal(), "Principal повинен бути Profile");
+        assertNotNull(authentication, "Authentication must be set");
+        assertEquals(profile, authentication.getPrincipal(), "Principal must be the Profile");
     }
 
-    // ==================== БЕЗ ТОКЕНА ====================
-
     @Test
-    @DisplayName("Запит без токена продовжує ланцюжок без аутентифікації")
+    @DisplayName("Request without token continues the chain without authentication")
     void doFilterInternal_noToken_continuesWithoutAuthentication() throws ServletException, IOException {
-        // Given - запит без заголовка Authorization
-
-        // When
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
-        // Then
         verify(filterChain).doFilter(request, response);
         assertNull(SecurityContextHolder.getContext().getAuthentication(),
-                "Без токена Authentication не повинен встановлюватися");
+                "Authentication must not be set without a token");
     }
 
     @Test
-    @DisplayName("Заголовок без 'Bearer ' префіксу ігнорується")
+    @DisplayName("Header without 'Bearer ' prefix is ignored")
     void doFilterInternal_noBearerPrefix_continuesWithoutAuthentication() throws ServletException, IOException {
-        // Given
         request.addHeader("Authorization", "Basic sometoken");
 
-        // When
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
-        // Then
         verify(filterChain).doFilter(request, response);
         assertNull(SecurityContextHolder.getContext().getAuthentication());
-        // JwtService не повинен викликатися
         verifyNoInteractions(jwtService);
     }
 
-    // ==================== НЕВАЛІДНИЙ ТОКЕН ====================
-
     @Test
-    @DisplayName("Невалідний токен продовжує ланцюжок без аутентифікації")
+    @DisplayName("Invalid token continues the chain without authentication")
     void doFilterInternal_invalidToken_continuesWithoutAuthentication() throws ServletException, IOException {
-        // Given
         String invalidToken = "invalid.token";
         request.addHeader("Authorization", "Bearer " + invalidToken);
 
         when(jwtService.isTokenValid(invalidToken)).thenReturn(false);
 
-        // When
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
-        // Then
         verify(filterChain).doFilter(request, response);
         assertNull(SecurityContextHolder.getContext().getAuthentication());
-        // getEmailFromToken не викликається для невалідного токена
         verify(jwtService, never()).getEmailFromToken(anyString());
     }
 
-    // ==================== КОРИСТУВАЧ НЕ ЗНАЙДЕНИЙ ====================
-
     @Test
-    @DisplayName("Токен валідний, але користувач не існує в БД")
+    @DisplayName("Token is valid, but user does not exist in the database")
     void doFilterInternal_userNotFound_continuesWithoutAuthentication() throws ServletException, IOException {
-        // Given
         String token = "valid.token";
         String email = "deleted@example.com";
 
@@ -153,16 +125,12 @@ class JwtAuthenticationFilterTest {
         when(jwtService.getEmailFromToken(token)).thenReturn(email);
         when(profileRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        // When
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
-        // Then
         verify(filterChain).doFilter(request, response);
         assertNull(SecurityContextHolder.getContext().getAuthentication(),
-                "Якщо користувач видалений, Authentication не встановлюється");
+                "Authentication must not be set if the user is missing");
     }
-
-    // ==================== HELPER METHODS ====================
 
     private Profile createTestProfile(Long id, String email, Role role) {
         Profile profile = new Profile();

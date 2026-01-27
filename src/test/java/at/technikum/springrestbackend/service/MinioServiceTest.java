@@ -26,8 +26,6 @@ class MinioServiceTest {
         minioService = new MinioService(minioClient, "test-bucket");
     }
 
-    // UPLOAD TESTS
-
     @Test
     @DisplayName("upload: null objectKey throws BAD_REQUEST")
     void test_upload_null_objectKey() {
@@ -48,8 +46,6 @@ class MinioServiceTest {
         assertThrows(Exception.class, () -> minioService.upload("test.png", null));
     }
 
-    //DOWNLOAD TESTS
-
     @Test
     @DisplayName("download: null objectKey throws BAD_REQUEST")
     void test_download_null_objectKey() {
@@ -67,8 +63,6 @@ class MinioServiceTest {
     void test_download_whitespace_objectKey() {
         assertThrows(Exception.class, () -> minioService.download("   "));
     }
-
-    // DELETE TESTS
 
     @Test
     @DisplayName("delete: null objectKey does not throw")
