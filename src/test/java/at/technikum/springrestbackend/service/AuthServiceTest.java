@@ -38,7 +38,7 @@ class AuthServiceTest {
         dto.setEmail("test@example.com");
         dto.setPassword("Password1");              // policy ok
         dto.setConfirmPassword("Password1");
-        dto.setCountry("AT");                      // valid ISO (має бути в AppConstants)
+        dto.setCountry("AT");                      // valid ISO
         return dto;
     }
 
@@ -60,14 +60,14 @@ class AuthServiceTest {
         return p;
     }
 
-    // ================= REGISTER =================
+    // REGISTER
 
     @Test
     void register_valid_savesProfile_andReturnsToken() {
         RegisterRequestDTO dto = baseRegister();
-        dto.setEmail("  TEST@Example.COM ");   // перевіримо normalizeEmail -> lower/trim
-        dto.setCountry(" at ");                // normalizeCountry -> upper/trim
-        dto.setUsername("  Markiyan  ");       // normalizeUsername -> trim
+        dto.setEmail("  TEST@Example.COM ");
+        dto.setCountry(" at ");
+        dto.setUsername("  Markiyan  ");
 
         when(profileRepository.existsByEmail("test@example.com")).thenReturn(false);
         when(profileRepository.existsByUsername("Markiyan")).thenReturn(false);
@@ -165,7 +165,7 @@ class AuthServiceTest {
     @Test
     void register_countryInvalid_throws400() {
         RegisterRequestDTO dto = baseRegister();
-        dto.setCountry("ZZ"); // майже напевно НЕ в списку
+        dto.setCountry("ZZ");
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> authService.register(dto));
         assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
@@ -193,7 +193,7 @@ class AuthServiceTest {
         assertEquals("Username already taken", ex.getReason());
     }
 
-    // ================= LOGIN =================
+    // LOGIN
 
     @Test
     void login_identifierMissing_throws400() {

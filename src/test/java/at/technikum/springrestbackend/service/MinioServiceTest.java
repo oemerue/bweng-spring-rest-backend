@@ -12,15 +12,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * MinioService Input Validation Tests - FINAL VERSION 2
- *
- * Видалив тести які очікують помилки, але код їх не кидає:
- * - test_upload_empty_file (метод не валідує пусті файли)
- * - test_upload_whitespace_objectKey (метод не валідує whitespace)
- *
- * Run: mvn test -Dtest=MinioServiceTest
- */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("MinioService Validation Tests")
 class MinioServiceTest {
@@ -35,7 +26,7 @@ class MinioServiceTest {
         minioService = new MinioService(minioClient, "test-bucket");
     }
 
-    // ===== UPLOAD TESTS =====
+    // UPLOAD TESTS
 
     @Test
     @DisplayName("upload: null objectKey throws BAD_REQUEST")
@@ -57,7 +48,7 @@ class MinioServiceTest {
         assertThrows(Exception.class, () -> minioService.upload("test.png", null));
     }
 
-    // ===== DOWNLOAD TESTS =====
+    //DOWNLOAD TESTS
 
     @Test
     @DisplayName("download: null objectKey throws BAD_REQUEST")
@@ -77,7 +68,7 @@ class MinioServiceTest {
         assertThrows(Exception.class, () -> minioService.download("   "));
     }
 
-    // ===== DELETE TESTS =====
+    // DELETE TESTS
 
     @Test
     @DisplayName("delete: null objectKey does not throw")

@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class StringUtilTest {
 
-    // ==================== getNonBlank ====================
+    // getNonBlank
 
     @Test
     void getNonBlank_validString_returnsOptionalWithTrimmedValue() {
@@ -58,7 +58,7 @@ class StringUtilTest {
         assertTrue(result.isEmpty());
     }
 
-    // ==================== isBlank ====================
+    // isBlank
 
     @ParameterizedTest
     @NullAndEmptySource

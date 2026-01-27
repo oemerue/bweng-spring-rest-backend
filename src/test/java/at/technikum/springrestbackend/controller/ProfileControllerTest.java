@@ -49,7 +49,6 @@ class ProfileControllerTest {
     @MockitoBean
     ProfileService profileService;
 
-    // ✅ важливо: щоб Spring НЕ створював реальний JwtAuthenticationFilter (і не падав на JwtService)
     @MockitoBean
     JwtAuthenticationFilter jwtAuthenticationFilter;
 

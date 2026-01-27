@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ImageUtilTest {
 
-    // ==================== isAllowedImageType ====================
+    // isAllowedImageType
 
     @ParameterizedTest
     @ValueSource(strings = {"image/png", "image/jpeg", "image/webp", "IMAGE/PNG", "Image/Jpeg"})
@@ -34,7 +34,6 @@ class ImageUtilTest {
         assertFalse(ImageUtil.isAllowedImageType(""));
     }
 
-    // ==================== validateImageFile ====================
 
     @Test
     void validateImageFile_validPng_noException() {
@@ -111,7 +110,7 @@ class ImageUtilTest {
         assertEquals(".jpg", ImageUtil.getExtension(null));
     }
 
-    // ==================== buildFileUrl ====================
+    // buildFileUrl
 
     @Test
     void buildFileUrl_validKey_returnsFullUrl() {

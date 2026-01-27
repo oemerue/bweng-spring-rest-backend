@@ -117,17 +117,13 @@ class JwtServiceTest {
             assertFalse(shortLivedService.isTokenValid(token));
         }
 
-        // ✅ ВИПРАВЛЕНО: null/empty перевіряємо інакше
         @Test
         @DisplayName("false для null токена")
         void isTokenValid_nullToken_returnsFalse() {
-            // Метод кидає виключення для null - це нормально
-            // Перевіряємо, що не буде NullPointerException, а буде handled
             try {
                 boolean result = jwtService.isTokenValid(null);
                 assertFalse(result);
             } catch (IllegalArgumentException e) {
-                // Це очікувана поведінка JJWT бібліотеки
                 assertTrue(e.getMessage().contains("null or empty"));
             }
         }

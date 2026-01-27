@@ -23,15 +23,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-/**
- * Тести для JWT Authentication Filter.
- * <p>
- * Цей фільтр перехоплює кожен HTTP запит і:
- * 1. Витягує JWT токен з заголовка Authorization
- * 2. Валідує токен
- * 3. Завантажує користувача з БД
- * 4. Встановлює Authentication в SecurityContext
- */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("JwtAuthenticationFilter - HTTP Request Authentication")
 class JwtAuthenticationFilterTest {

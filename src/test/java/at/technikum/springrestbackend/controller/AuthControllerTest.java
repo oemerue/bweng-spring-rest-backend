@@ -10,15 +10,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/**
- * AuthControllerTest - FINAL VERSION
- *
- * БЕЗ мокування - просто тестуємо створення контролера
- * Видалив all stubbing (when(...).thenReturn(...))
- * які не використовуються в тесті
- *
- * Run: mvn test -Dtest=AuthControllerTest
- */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AuthController Unit Tests")
 class AuthControllerTest {
@@ -36,14 +27,12 @@ class AuthControllerTest {
     @Test
     @DisplayName("register: controller is initialized")
     void test_register_valid() {
-        // Просто тестуємо що контролер створився
         assertNotNull(authController);
     }
 
     @Test
     @DisplayName("login: controller is initialized")
     void test_login_valid() {
-        // Просто тестуємо що контролер створився
         assertNotNull(authController);
     }
 }

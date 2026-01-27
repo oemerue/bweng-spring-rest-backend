@@ -64,7 +64,7 @@ class ProfileServiceTest {
         SecurityContextHolder.clearContext();
     }
 
-    // ==================== PUBLIC ENDPOINTS ====================
+    // PUBLIC ENDPOINTS
 
     @Test
     void getAllProfilesPublic_returnsListOfPublicProfiles() {
