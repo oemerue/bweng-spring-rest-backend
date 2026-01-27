@@ -64,8 +64,6 @@ class ProfileServiceTest {
         SecurityContextHolder.clearContext();
     }
 
-    // ==================== PUBLIC ENDPOINTS ====================
-
     @Test
     void getAllProfilesPublic_returnsListOfPublicProfiles() {
         Profile p1 = createTestProfile(1L, Role.USER);
@@ -113,8 +111,6 @@ class ProfileServiceTest {
         assertThrows(EntityNotFoundException.class, () -> profileService.getProfilePublic(999L));
     }
 
-    // ==================== AUTHENTICATED ENDPOINTS ====================
-
     @Test
     void getMyProfile_authenticated_returnsFullProfile() {
         Profile me = createTestProfile(1L, Role.USER);
@@ -129,7 +125,6 @@ class ProfileServiceTest {
 
     @Test
     void getMyProfile_notAuthenticated_throws401() {
-        // No authentication set
         assertThrows(ResponseStatusException.class, () -> profileService.getMyProfile());
     }
 
@@ -174,7 +169,7 @@ class ProfileServiceTest {
         authenticateAs(me);
 
         ProfileUpdateDTO dto = new ProfileUpdateDTO();
-        dto.setUsername("SameUsername"); // Same as current
+        dto.setUsername("SameUsername");
 
         when(profileRepository.save(any(Profile.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -244,8 +239,6 @@ class ProfileServiceTest {
         verify(minioService).delete("avatars/1/test.png");
         verify(profileRepository).delete(me);
     }
-
-    // ==================== ADMIN ENDPOINTS ====================
 
     @Test
     void getProfileForAdmin_existingId_returnsFullProfile() {
@@ -347,5 +340,4 @@ class ProfileServiceTest {
 
         assertEquals(1L, result.getId());
     }
-
 }

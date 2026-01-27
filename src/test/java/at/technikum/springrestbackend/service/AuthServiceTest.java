@@ -26,25 +26,31 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
-    @Mock ProfileRepository profileRepository;
-    @Mock PasswordEncoder passwordEncoder;
-    @Mock JwtService jwtService;
+    @Mock
+    ProfileRepository profileRepository;
 
-    @InjectMocks AuthService authService;
+    @Mock
+    PasswordEncoder passwordEncoder;
+
+    @Mock
+    JwtService jwtService;
+
+    @InjectMocks
+    AuthService authService;
 
     private RegisterRequestDTO baseRegister() {
         RegisterRequestDTO dto = new RegisterRequestDTO();
-        dto.setUsername("Markiyan");               // >=5
+        dto.setUsername("Markiyan");
         dto.setEmail("test@example.com");
-        dto.setPassword("Password1");              // policy ok
+        dto.setPassword("Password1");
         dto.setConfirmPassword("Password1");
-        dto.setCountry("AT");                      // valid ISO (має бути в AppConstants)
+        dto.setCountry("AT");
         return dto;
     }
 
     private LoginRequestDTO loginDto(String identifier, String password) {
         LoginRequestDTO dto = new LoginRequestDTO();
-        dto.setEmail(identifier); // identifier (email OR username)
+        dto.setEmail(identifier);
         dto.setPassword(password);
         return dto;
     }
@@ -60,14 +66,12 @@ class AuthServiceTest {
         return p;
     }
 
-    // ================= REGISTER =================
-
     @Test
     void register_valid_savesProfile_andReturnsToken() {
         RegisterRequestDTO dto = baseRegister();
-        dto.setEmail("  TEST@Example.COM ");   // перевіримо normalizeEmail -> lower/trim
-        dto.setCountry(" at ");                // normalizeCountry -> upper/trim
-        dto.setUsername("  Markiyan  ");       // normalizeUsername -> trim
+        dto.setEmail("  TEST@Example.COM ");
+        dto.setCountry(" at ");
+        dto.setUsername("  Markiyan  ");
 
         when(profileRepository.existsByEmail("test@example.com")).thenReturn(false);
         when(profileRepository.existsByUsername("Markiyan")).thenReturn(false);
@@ -113,7 +117,7 @@ class AuthServiceTest {
     @Test
     void register_usernameTooShort_throws400() {
         RegisterRequestDTO dto = baseRegister();
-        dto.setUsername("abcd"); // < 5
+        dto.setUsername("abcd");
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> authService.register(dto));
         assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
@@ -134,7 +138,7 @@ class AuthServiceTest {
     @Test
     void register_passwordPolicyFail_throws400() {
         RegisterRequestDTO dto = baseRegister();
-        dto.setPassword("password1");          // no uppercase
+        dto.setPassword("password1");
         dto.setConfirmPassword("password1");
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> authService.register(dto));
@@ -165,7 +169,7 @@ class AuthServiceTest {
     @Test
     void register_countryInvalid_throws400() {
         RegisterRequestDTO dto = baseRegister();
-        dto.setCountry("ZZ"); // майже напевно НЕ в списку
+        dto.setCountry("ZZ");
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> authService.register(dto));
         assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
@@ -192,8 +196,6 @@ class AuthServiceTest {
         assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
         assertEquals("Username already taken", ex.getReason());
     }
-
-    // ================= LOGIN =================
 
     @Test
     void login_identifierMissing_throws400() {

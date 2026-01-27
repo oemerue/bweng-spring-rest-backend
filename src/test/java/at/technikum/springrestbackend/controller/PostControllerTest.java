@@ -53,7 +53,6 @@ class PostControllerTest {
     @MockitoBean
     PostService postService;
 
-    // ✅ важливо: щоб Spring НЕ створював реальний JwtAuthenticationFilter (і не падав на JwtService)
     @MockitoBean
     JwtAuthenticationFilter jwtAuthenticationFilter;
 

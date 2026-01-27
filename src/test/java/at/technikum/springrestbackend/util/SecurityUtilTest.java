@@ -36,7 +36,7 @@ class SecurityUtilTest {
         SecurityContextHolder.clearContext();
     }
 
-    // ==================== currentProfileOrThrow ====================
+    // currentProfileOrThrow
 
     @Test
     void currentProfileOrThrow_authenticated_returnsProfile() {
@@ -65,7 +65,7 @@ class SecurityUtilTest {
         assertThrows(ResponseStatusException.class, SecurityUtil::currentProfileOrThrow);
     }
 
-    // ==================== currentProfile ====================
+    // currentProfile
 
     @Test
     void currentProfile_authenticated_returnsOptionalWithProfile() {
@@ -85,7 +85,7 @@ class SecurityUtilTest {
         assertTrue(result.isEmpty());
     }
 
-    // ==================== isAdmin ====================
+    // isAdmin
 
     @Test
     void isAdmin_adminRole_returnsTrue() {
@@ -106,7 +106,7 @@ class SecurityUtilTest {
         assertFalse(SecurityUtil.isAdmin(null));
     }
 
-    // ==================== isCurrentUserAdmin ====================
+    // isCurrentUserAdmin
 
     @Test
     void isCurrentUserAdmin_adminAuthenticated_returnsTrue() {
@@ -129,7 +129,7 @@ class SecurityUtilTest {
         assertFalse(SecurityUtil.isCurrentUserAdmin());
     }
 
-    // ==================== ensureOwnerOrAdmin ====================
+    // ensureOwnerOrAdmin
 
     @Test
     void ensureOwnerOrAdmin_isOwner_noException() {
